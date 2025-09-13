@@ -65,8 +65,8 @@ class AuditeeOrganization(models.Model):
 
 # 6. Engagement
 class Engagement(models.Model):
-    QUARTERS = [('Q1','Q1'), ('Q2','Q2'), ('Q3','Q3'), ('Q4','Q4')]
-    STATUS_CHOICES = [('On-Track','On-Track'), ('Overdue','Overdue'), ('Completed','Completed')]
+    QUARTERS = [('Q1','Quarter 1'), ('Q2','Quarter 2'), ('Q3','Quarter 2'), ('Q4','Quarter 4')]
+    STATUS_CHOICES = [('P','Pending'),('On-Track','On-Track'), ('Overdue','Overdue'), ('Completed','Completed')]
     PHASES = [('Pre-Engagement','Pre-Engagement'), ('Fieldwork','Fieldwork'), ('Reporting','Reporting'), ('Followup','Followup')]
 
     plan = models.ForeignKey(AuditPlan, on_delete=models.CASCADE)

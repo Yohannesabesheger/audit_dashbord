@@ -4,101 +4,127 @@ from .models import (
     Engagement, Responsibility, Assignment, Finding, Objective, SubTask
 )
 
-# --- Audit Types ---
+# --- AuditType Serializer ---
 class AuditTypeSerializer(serializers.ModelSerializer):
-    objects = serializers.StringRelatedField(many=True)  # Shows object names related
-
     class Meta:
         model = AuditType
-        fields = ['id', 'type_name', 'objects']
+        fields = '__all__'
 
-# --- Audit Objects ---
+# --- AuditObject Serializer ---
 class AuditObjectSerializer(serializers.ModelSerializer):
-    type_id = AuditTypeSerializer(read_only=True)
+    type = AuditTypeSerializer(read_only=True)
+    type_id = serializers.PrimaryKeyRelatedField(
+        queryset=AuditType.objects.all(), source='type', write_only=True
+    )
 
     class Meta:
         model = AuditObject
-        fields = ['id', 'object_name', 'description', 'type_id']
+        fields = '__all__'
 
-# --- Auditor ---
+# --- AuditPlan Serializer ---
+class AuditPlanSerializer(serializers.ModelSerializer):
+    object = AuditObjectSerializer(read_only=True)
+    object_id = serializers.PrimaryKeyRelatedField(
+        queryset=AuditObject.objects.all(), source='object', write_only=True
+    )
+    audit_type = AuditTypeSerializer(read_only=True)
+    audit_type_id = serializers.PrimaryKeyRelatedField(
+        queryset=AuditType.objects.all(), source='audit_type', write_only=True
+    )
+
+    class Meta:
+        model = AuditPlan
+        fields = '__all__'
+
+# --- Auditor Serializer ---
 class AuditorSerializer(serializers.ModelSerializer):
     expertise_area = AuditTypeSerializer(read_only=True)
+    expertise_area_id = serializers.PrimaryKeyRelatedField(
+        queryset=AuditType.objects.all(), source='expertise_area', write_only=True
+    )
 
     class Meta:
         model = Auditor
-        fields = ['id','job_title','department','expertise_area','auditor_name','contact_info','email','phone']
+        fields = '__all__'
 
-# --- Auditee Organization ---
+# --- AuditeeOrganization Serializer ---
 class AuditeeOrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuditeeOrganization
-        fields = ['id','organization_name','contact_person','contact_email','contact_phone']
+        fields = '__all__'
 
-# --- SubTask Serializer ---
-class SubTaskSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SubTask
-        fields = ['id','sub_task_name','start_date','end_date','status','description','progress_percent','assigned_to']
-
-# --- Objective Serializer (with nested SubTasks) ---
-class ObjectiveSerializer(serializers.ModelSerializer):
-    subtasks = SubTaskSerializer(many=True, read_only=True)
+# --- Engagement Serializer ---
+class EngagementSerializer(serializers.ModelSerializer):
+    plan = AuditPlanSerializer(read_only=True)
+    plan_id = serializers.PrimaryKeyRelatedField(
+        queryset=AuditPlan.objects.all(), source='plan', write_only=True
+    )
 
     class Meta:
-        model = Objective
-        fields = ['id','objective_name','description','target_value','achieved_value','performance_percent','assigned_to','subtasks']
+        model = Engagement
+        fields = '__all__'
 
 # --- Responsibility Serializer ---
 class ResponsibilitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Responsibility
-        fields = ['responsibility_id','description']
+        fields = '__all__'
 
 # --- Assignment Serializer ---
 class AssignmentSerializer(serializers.ModelSerializer):
-    performer = AuditorSerializer(read_only=True)
-    engagement = serializers.StringRelatedField()
+    engagement = EngagementSerializer(read_only=True)
+    engagement_id = serializers.PrimaryKeyRelatedField(
+        queryset=Engagement.objects.all(), source='engagement', write_only=True
+    )
     responsibility = ResponsibilitySerializer(read_only=True)
+    responsibility_id = serializers.PrimaryKeyRelatedField(
+        queryset=Responsibility.objects.all(), source='responsibility', write_only=True
+    )
 
     class Meta:
         model = Assignment
-        fields = ['performer','engagement','responsibility']
+        fields = '__all__'
 
 # --- Finding Serializer ---
 class FindingSerializer(serializers.ModelSerializer):
-    plan_id = serializers.StringRelatedField()
-    follower = AuditorSerializer(read_only=True)
+    plan = AuditPlanSerializer(read_only=True)
+    plan_id = serializers.PrimaryKeyRelatedField(
+        queryset=AuditPlan.objects.all(), source='plan', write_only=True
+    )
 
     class Meta:
         model = Finding
-        fields = [
-            'finding_id','finding','criticality_level','audit_team','plan_id',
-            'auditee_organization','overdue_status','rectification_status',
-            'rectification_percent','assigned_team','rectificaton_description',
-            'follow_up_date','auditor_comments','follower'
-        ]
+        fields = '__all__'
 
-# --- Engagement Serializer (with nested Findings) ---
-class EngagementSerializer(serializers.ModelSerializer):
-    plan_id = serializers.StringRelatedField()
-    findings = FindingSerializer(many=True, read_only=True)
+# --- Objective Serializer ---
+class ObjectiveSerializer(serializers.ModelSerializer):
+    assigned_to = AuditorSerializer(read_only=True)
+    assigned_to_id = serializers.PrimaryKeyRelatedField(
+        queryset=Auditor.objects.all(), source='assigned_to', write_only=True
+    )
+    performance_percent = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Objective
+        fields = '__all__'
+
+# --- SubTask Serializer ---
+class SubTaskSerializer(serializers.ModelSerializer):
+    parent = ObjectiveSerializer(read_only=True)
+    parent_id = serializers.PrimaryKeyRelatedField(
+        queryset=Objective.objects.all(), source='parent', write_only=True
+    )
+
+    class Meta:
+        model = SubTask
+        fields = '__all__'
+
+
+# --- EngagementPlan Serializer ---
+# Serializer for Engagement (Nested)
+class EngagementPlanSerializer(serializers.ModelSerializer):
+    plan = AuditPlanSerializer(read_only=True)
 
     class Meta:
         model = Engagement
-        fields = [
-            'id','plan_id','start_date','end_date','quarter','year','status',
-            'status_details','phase','findings'
-        ]
-
-# --- Audit Plan Serializer (with nested Engagements) ---
-class AuditPlanSerializer(serializers.ModelSerializer):
-    object_id = AuditObjectSerializer(read_only=True)
-    audit_type_id = AuditTypeSerializer(read_only=True)
-    engagements = EngagementSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = AuditPlan
-        fields = [
-            'plan_id','object_id','plan_year','audit_type_id','planed_quarter',
-            'plan_status','assigned_team','current_year','engagements'
-        ]
+        fields = ('id', 'plan', 'start_date', 'end_date', 'quarter', 'year', 'status', 'status_details', 'phase')
