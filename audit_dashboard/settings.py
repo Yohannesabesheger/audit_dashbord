@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +26,16 @@ SECRET_KEY = 'django-insecure-4o)l+ba!7!)4rfy@@lhfm)#gz@*6faiuns=mc(4sj74g(^f@wo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Media files (user uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'  # Where uploaded images will be stored
+
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+     '::1' # optional if you also use the www subdomain
+]
 
 
 # Application definition
@@ -37,9 +47,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'django_filters',
+    'djoser',
+    'dashbords',
+    'debug_toolbar',
+    'core'
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -50,6 +67,11 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'audit_dashboard.urls'
+
+INTERNAL_IPS = [
+    '127.0.0.1',  # localhost
+]
+
 
 TEMPLATES = [
     {
@@ -69,6 +91,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'audit_dashboard.wsgi.application'
 
 
+
+
+
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -78,6 +103,16 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'milki4',
+#         'HOST': 'localhost',
+#         'USER': 'storeuser',
+#         'PASSWORD': 'Yohannes@123321'
+#     }
+# }
+
 
 
 # Password validation
@@ -120,3 +155,36 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#================================ Django REST Framework Configuration ================================
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+        'rest_framework.filters.SearchFilter',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+}
+
+
+#================================ JWT Authentication Configuration ================================
+# Custom user model
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME':  timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('JWT',),
+}
+
+AUTH_USER_MODEL = 'core.User'
+
+
+DJOSER = {
+    'SERIALIZERS': {
+        'user_create': 'core.serializer.UserCreateSerializer',
+        'current_user': 'core.serializer.UserSerializer',
+    }
+}                   
