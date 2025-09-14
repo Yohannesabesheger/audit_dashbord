@@ -29,7 +29,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 SECRET_KEY = 'django-insecure-4o)l+ba!7!)4rfy@@lhfm)#gz@*6faiuns=mc(4sj74g(^f@wo'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # Media files (user uploads)
 MEDIA_URL = '/media/'
@@ -37,8 +37,9 @@ MEDIA_ROOT = BASE_DIR / 'media'  # Where uploaded images will be stored
 
 
 ALLOWED_HOSTS = [
-    'localhost',
     'dash.birrx.io',
+    'www.dash.birrx.io',
+    'localhost',
     '127.0.0.1',
      '::1' # optional if you also use the www subdomain
 ]
