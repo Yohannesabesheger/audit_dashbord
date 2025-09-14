@@ -38,6 +38,7 @@ MEDIA_ROOT = BASE_DIR / 'media'  # Where uploaded images will be stored
 
 ALLOWED_HOSTS = [
     'localhost',
+    'dash.birrx.io',
     '127.0.0.1',
      '::1' # optional if you also use the www subdomain
 ]
