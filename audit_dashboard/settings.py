@@ -113,6 +113,41 @@ WSGI_APPLICATION = 'audit_dashboard.wsgi.application'
 #     }
 # }
 
+
+
+
+
+
+
+
+
+
+
+
+
+DATABASES = {
+'default': {
+'ENGINE': 'django.db.backends.postgresql',
+'NAME': 'dashbord',
+'USER': 'username',
+'PASSWORD': '******************',
+'HOST': 'localhost',
+'PORT': '5432',
+}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 DATABASES = {
 'default': {
 'ENGINE': 'django.db.backends.postgresql',
